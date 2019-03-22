@@ -7,13 +7,18 @@ const jsonParser = express.json();
 const taskScheme = new Schema({name: String, description: String, status: String}, {versionKey: false});
 const Task_ = mongoose.model("Task", taskScheme);
 
+const PORT = process.env.PORT || 3000;
+
 app.use(express.static(__dirname + "/public"));
 
-mongoose.connect("mongodb://localhost:27017/tasksdb", { useNewUrlParser: true }, function(err){
+const localUrl = "mongodb://localhost:27017/tasksdb";
+const mongoUrl = process.env.MONGODB_URI || localUrl;
+
+mongoose.connect(mongoUrl, { useNewUrlParser: true }, function(err){
     if(err) return console.log(err);
 
-    app.listen(3000, function(){
-        console.log("Сервер очікує підключення...");
+    app.listen(PORT, function(){
+        console.log(`App started on http://localhost:${PORT}`);
     });
 });
 
@@ -26,7 +31,7 @@ app.get("/api/tasks", function(req, res){
 
 app.get("/api/tasks/:id", function(req, res){
     const id = req.params.id;
-    
+
     Task_.findOne({_id: id}, function(err, task){
         if(err) return console.log(err);
         res.send(task);
